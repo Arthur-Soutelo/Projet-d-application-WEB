@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Volcans</title>
+
+    <link rel="stylesheet" type="text/css" href="style_main.css?version=2.5" /> 
+
+    <script src="leaflet.js"></script>
+    <script src="comments.js"></script>
+    <script src="apputils.js"></script>
+	
+</head>
+
+<body>
+    <header>
+        <div id="title" class="title_pag">
+            <h1>Volcans remarquables dans le monde</h1>
+        </div>
+        <nav>
+            <li><span>Vous n'êtes pas connecté</span></li>
+            <li><span><a id="login_button" class="button">Se connecter</a></span></li>
+        </nav>
+    </header>
+
+    <body onload="load_data()">
+
+
+    <div class="site_body">
+        </div class="Partie_gauche">
+            <div id="Carte" class="Carte_class" >
+                <div id="map" class="map"></div>
+            </div>
+
+            <footer class="menu_continents">
+                <nav>
+                    <li><span><a id="btnAfrique" class="button">Afrique</a></span></li>
+                    <li><span><a id="btnAmeNordCentral" class="button">Amérique du Nord et Centrale</a></span></li>
+                    <li><span><a id="btnAmeSud" class="button">Amérique du Sud</a></span></li>
+                    <li><span><a id="btnAntarctique" class="button">Antarctique</a></span></li>
+                    <li><span><a id="btnAsie" class="button">Asie</a></span></li>
+                    <li><span><a id="btnEurope" class="button">Europe</a></span></li>
+                    <li><span><a id="btnOceanie" class="button">Océanie</a></span></li>
+                </nav>
+            </footer>
+        </div>
+
+    
+        <div style = "display: inline-block;">
+            <div id="Menu" class="Menu_class" >
+                <div id="informations" class="infos">
+                    <h1 id="message_de_bienvenue" class="message_presentation"> 
+                        Tu souhaites en savoir plus sur un volcan particulier ou tout simplement découvrir certains volcans remarquables de la planète ? 
+                    </h1>
+                    <h1 id="message_de_bienvenue2" class="message_presentation2">
+                        Alors tu es au bon endroit !<br> Laisse parler ta curiosité, clique sur un marqueur de la carte et voyage vers le volcan correspondant.
+                    </h1>
+                    <!-- CODE AJAX !-->
+                </div>
+
+                <div id="message_editor" class="commentaire">
+                    <header id="message_editor_header" class="title_commentaires">
+                        Écrire un commentaire
+                    </header>
+                        <label><span>Pseudo         : </span><input id="input_pseudo"></label>
+                        <label><span>Password       : </span><input id="input_password" type="password"></label>
+                        <label><span>Date de visite : </span><input id="input_date"></label><br>
+                        <label><span>Message        : </span><br><textarea id="input_message"></textarea></label>
+                    <footer>
+                        <button id="creation_message" title="valider">Valider</button>
+
+                        <label id="error_message_commentaire"> E R R O R</label>
+
+                    </footer>
+                </div>
+
+                
+                <div id="pwd_request" class="popup">
+                      <header id="pwd_request_header" class="handle">Connectez-vous pour supprimer ce message <button id="hide_editor" title="annuler" class="hide_popup"> &#x2612;</button></header>
+
+                      <label id="Pseudo_del"><span>Pseudo : </span><input id="enter_pseudo"></label>
+                      <label id="PWD_del"><span>Password : </span><input id="enter_pwd" type="password"></label>
+
+                      <footer style='display:inline'>
+                        <button id="confirm_pwd" title="Valider">Ok</button><br>
+                        <label id="error_message_supprimer"> E R R O R</label>
+                      </footer>
+                  </div>
+
+
+                <div id="messages" class="commentaires">
+                    <!-- CODE AJAX !-->
+                </div>
+
+            </div>
+            
+        </div>
+    </div>                
+    
+</body>
+
+
+<script type="text/javascript">
+    var map = L.map('map', {
+        minZoom: 1
+    }).setView([0, 0], 1);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+message_editor.style.visibility = 'hidden';
+
+var site_name 
+
+login_button.addEventListener('click', Login);
+creation_message.addEventListener('click', post_message);
+    
+//Buttons Continents
+btnAfrique.addEventListener('click', Afrique);
+btnAmeNordCentral.addEventListener('click', AmeNordCentral);
+btnAmeSud.addEventListener('click', AmeSud);
+btnAntarctique.addEventListener('click', Antarctique);
+btnAsie.addEventListener('click', Asie);
+btnEurope.addEventListener('click', Europe);
+btnOceanie.addEventListener('click', Oceanie);
+	
+
+    
+// When the user clicks on button, open the popup
+function showPopupRegister() {
+  var popup_reg = document.getElementById("popup_login_id");
+  popup_reg.classList.toggle("show");
+}
+
+function load_data() {
+
+  // objet pour l'envoi d'une requête Ajax
+  var xhr = new XMLHttpRequest();
+
+  // fonction appelée lorsque la réponse à la requête (liste des volcans remarquables) sera arrivée
+  xhr.onload = function() {
+
+    var data = JSON.parse(sanitize_html(this.responseText));
+
+    // boucle sur les lieux
+    for ( n = 0; n < data.length; n++ ) {
+      L.marker([data[n][1],data[n][2]]).addTo(map)
+       .bindPopup(data[n][0])
+       .addEventListener('click',OnMarkerClick)
+       .idnum = data[n][0];
+    }
+  };
+
+  // Envoi de la requête Ajax pour la récupération de la liste des lieux insolites
+  xhr.open('GET','/volcans',true);
+  xhr.send();
+
+}
+
+function OnMarkerClick(e){
+  message_editor.style.visibility = 'visible';
+  message_editor.style.display='inline-block';
+
+  // objet pour l'envoi d'une requête Ajax
+  var xhr = new XMLHttpRequest();
+  // fonction appelée lorsque la réponse à la requête (liste des volcans remarquables) sera arrivée
+  xhr.onload = function() {
+    var data = JSON.parse(this.responseText);
+    //console.log(data)
+
+    var html = '<img id="photo-presentation" src="' + data[0][9] + '">';
+    var html1 = '<i>'+ html+ '<h2><a id="title_volc" class=lien href="' + data[0][2] + '">' + site_name + '</a></h2></i><br>';
+    html1 +=  "<strong>Altitude du volcan :</strong> " + data[0][3] +' m'+'<br>';
+    html1 += "<strong>Coordonnées :</strong> "
+    html1 +=  "Lat :" + data[0][4]
+    html1 +="  |  Lon : " + data[0][5] +'<br>';
+    html1 +=  "<strong>Date d'éruption :</strong> " + data[0][6]+'<br>';
+    html1 += '<p>'+data[0][8] + '</p>';
+    html1 += '<br><t class="lien">Read more on : '+'<a href="' + data[0][0] +'" style ="font-style: italic;font-size: smaller;">'+ data[0][0] +' </a></t>'
+    informations.innerHTML =  html1;
+
+    display_messages() 
+    //commentaires.innerHTML =  html2
+  
+  };
+  // Le numéro du lieu est récupéré via la propriété personnalisée du marqueur
+
+  site_name = e.target.idnum
+
+
+  // Envoi de la requête Ajax pour la récupération de la description du lieu de numéro idnum
+  xhr.open('GET','/infos/'+ site_name,true);
+  xhr.send();
+}
+
+function Login() {
+    window.location.href = 'connexion.html';
+}
+
+
+function showDeleteRegister() {
+      var popup_reg = document.getElementById("delete_com");
+      popup_reg.classList.toggle("visible");
+    }
+
+
+function Afrique(){
+    window.location.href = 'volcansContinent.html';
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        localStorage.setItem('dataContinent',JSON.stringify(data));
+    };
+
+    xhr.open('GET','/liste_continent/Afrique',true);
+    xhr.send();
+    
+    
+    
+}
+function AmeNordCentral(){
+    window.location.href = 'volcansContinent.html';
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        localStorage.setItem('dataContinent',JSON.stringify(data));
+    };
+    xhr.open('GET','/liste_continent/AmeNordCentral',true);
+    xhr.send();
+    
+    
+}
+function AmeSud(){
+    window.location.href = 'volcansContinent.html'
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        localStorage.setItem('dataContinent',JSON.stringify(data));
+    };
+    xhr.open('GET','/liste_continent/AmeSud',true);
+    xhr.send();
+
+   
+}
+function Antarctique(){
+    window.location.href = 'volcansContinent.html'
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        localStorage.setItem('dataContinent',JSON.stringify(data));
+    };
+    xhr.open('GET','/liste_continent/Antarctique',true);
+    xhr.send();
+
+   
+}
+function Asie(){
+    window.location.href = 'volcansContinent.html'
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        localStorage.setItem('dataContinent',JSON.stringify(data));
+    };
+    xhr.open('GET','/liste_continent/Asie',true);
+    xhr.send();
+
+   
+}
+function Europe(){
+    window.location.href = 'volcansContinent.html'
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        localStorage.setItem('dataContinent',JSON.stringify(data));
+    };
+    xhr.open('GET','/liste_continent/Europe',true);
+    xhr.send();
+
+ 
+}
+function Oceanie(){
+    window.location.href = 'volcansContinent.html'
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        localStorage.setItem('dataContinent',JSON.stringify(data));
+    };
+    xhr.open('GET','/liste_continent/Oceanie',true);
+    xhr.send();
+
+
+}
+
+
+</script>

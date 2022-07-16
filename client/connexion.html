@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Connexion</title>
+
+    <link rel="stylesheet" type="text/css" href="style_connexion.css?version=1.2" /> 
+
+    <script src="comments.js"></script>
+    <script src="apputils.js"></script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <li><span><a id="back_button" class="button">&larr; Retour à la page d'accueil</a></span></li>
+        </nav>
+
+    </header>
+
+
+
+    <div id="login_user" class="login_box">
+        <div>
+            <label><span>e-mail : </span><input id="input_email_login"></label><br>
+            <label><span>Mot de passe : </span><input id="input_user_password_login" type="password"></label><br>
+        </div>
+        <footer style='display:inline'>
+          <button id="login_but" class="button_creation" title="Connexion">&#x2705;</button><br><br>
+
+          <b>Vous n'avez pas de compte ?</b>
+          <button id="creation_user_but" title="Création de compte">Créer un compte</button>
+        </footer>
+    </div>
+
+
+    <div id="creation_user" class="popup">
+        <div class="popuplogin" id="popup_login_id">
+            <header id="pwd_request_header" class="handle">
+                <div>
+                    <h3>Creation d'un compte</h3>
+                </div>
+                <nav>
+                    <li><span><a id="close_register">Fermer</a></span></li>
+                </nav>
+            </header>
+
+            <label><span>Pseudo : </span><input id="input_user_pseudo"></label>
+            <label><span>e-mail : </span><input id="input_email"></label>
+            <label><span>Mot de passe : </span><input id="input_user_password" type="password"></label>
+
+            <footer style='display:inline'>
+              <button id="create_user" class="button_creation" title="Sauvegarder">&#x2705;</button>
+            </footer>
+        </div>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+    //login_but.addEventListener('click', Login);
+    creation_user_but.addEventListener('click', showPopupRegister);
+
+    create_user.addEventListener('click', nouveau_utilisateur);
+    back_button.addEventListener('click', go_back);
+    close_register.addEventListener('click', showPopupRegister);
+    login_but.addEventListener('click', connexion);
+
+        // When the user clicks on button, open the popup
+    function showPopupRegister() {
+      var popup_reg = document.getElementById("popup_login_id");
+      popup_reg.classList.toggle("show");
+    }
+
+    function nouveau_utilisateur() {
+        post_user()
+        go_back()
+    }
+
+    function connexion() {
+        //login_post()
+        go_back()
+    }
+
+    function go_back(){
+        window.location.href="/"
+    }
+
+    function login_post() {
+      let headers = {'Content-Type': 'application/json' };
+        body = {};
+
+        email = document.getElementById("input_email_login").value;
+        password = btoa(document.getElementById("input_user_password_login").value);
+
+        body = {'email':email,'password':atob(password)}
+
+        //function btoa(‘string’) encodes the string passed while atob(‘encoded_string’) does the decoding of the encoded string.
+
+        console.log(body)
+        console.log(status)
+        ajax_request('POST','/login', JSON.stringify(body), headers, function() {
+        if ( this.status == 200 ) {
+            var result = this.responseText;
+            console.log(result)
+            login_user.style.display='none';
+        }
+        else {
+            let errmsg = (this.statusText == "??'") ? '??' : this.statusText
+            , status = (this.statusText == "??'") ? 401 : this.status
+            ;
+            alert(status+' '+errmsg);
+            console.log(status,errmsg);
+        }
+        });
+}
+
+
+
+</script>   

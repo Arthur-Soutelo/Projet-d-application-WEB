@@ -1,0 +1,40 @@
+# INFO-tc3-Volcans
+
+Projet A : Volcans remarquables
+
+Objectif:
+-Afficher une carte
+-Déterminer les points d'intérêts
+-Trouver une fonctionnalité originale
+## Commandes utiles
+```
+git status
+git pull
+git checkout -b <NOM_BRANCH> 			# Creer une Branch et changer de Branch
+git add <NOM_FICHIER>				# Les fichiers qui tu veux fair un commit
+git commit -m "<MESSAGE>"			# Commit
+git push origin <NOM_BRANCH>
+git status
+```
+
+## TO-DO LIST
+
+- Afficher les volcans sur la carte
+	- Requêtes python
+	- SQL python
+	- Affichage ajax
+
+- Changer la couleur du volcan choisit
+	- Monter infos de la wiki
+	- Affichage photo
+
+
+* Creer des categories d'affichage
+	- Dates d'eruption etc.
+
+
+
++ Comentaires
+	- Creer compte / Login
+
++ like / dislike

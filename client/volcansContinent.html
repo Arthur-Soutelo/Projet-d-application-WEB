@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Connexion</title>
+
+    <link rel="stylesheet" type="text/css" href="style_continents.css?version=1.1" /> 
+
+    <script src="comments.js"></script>
+    <script src="apputils.js"></script>
+</head>
+
+<body>
+    <header>
+
+        <nav>
+            <li><span><a id="back_button" class="button">&larr; Retour à la page d'accueil</a></span></li>
+        </nav>
+
+        <div id="title" class="title_continent">
+            <h1>Volcans remarquables dans le continent</h1>
+        </div>
+
+    </header>
+
+    <div id="afficheVolcansContinent">
+        
+    </div>
+
+</body>
+
+<script type="text/javascript">
+    
+    window.onload = function() {
+        let dataContinent = JSON.parse(localStorage.getItem('dataContinent'));
+        for (var i = 0; i < dataContinent.length; i++){
+            const divVolcan = document.createElement("div");
+            const paraNomVolcan = document.createElement("p");
+            const nomVolcan = document.createTextNode(dataContinent[i][0]);
+            paraNomVolcan.appendChild(nomVolcan);
+            var imgVolcan = document.createElement("img");
+            imgVolcan.src = dataContinent[i][1];
+            divVolcan.appendChild(paraNomVolcan)
+            divVolcan.appendChild(imgVolcan)
+            const element = document.getElementById("afficheVolcansContinent");
+            element.appendChild(divVolcan);
+        };
+        
+        //localStorage.removeItem('dataContinent');
+    };
+    //login_but.addEventListener('click', Login);
+    
+    back_button.addEventListener('click', go_back);
+
+        // When the user clicks on button, open the popup
+
+    function go_back(){
+        window.location.href="/"
+    }
+    
+    
+</script>   
